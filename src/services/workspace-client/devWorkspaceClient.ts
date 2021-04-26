@@ -67,7 +67,7 @@ export class DevWorkspaceClient extends WorkspaceClient {
     const workspaces = await this.dwApi.listInNamespace(defaultNamespace);
     const availableWorkspaces: IDevWorkspace[] = [];
     for (const workspace of workspaces) {
-      if (!isDeleting(workspace) && !isWebTerminal(workspace)) {
+      if (!isWebTerminal(workspace)) {
         availableWorkspaces.push(workspace);
       }
     }
@@ -123,6 +123,10 @@ export class DevWorkspaceClient extends WorkspaceClient {
         },
         spec: pluginDevfile
       });
+
+      if (createdWorkspace.spec.template.components === undefined) {
+        createdWorkspace.spec.template.components = [];
+      }
 
       createdWorkspace.spec.template.components.push({
         name: theiaDWT.metadata.name,
@@ -211,8 +215,8 @@ export class DevWorkspaceClient extends WorkspaceClient {
     const workspaceId = devworkspace.status.devworkspaceId;
     // Starting devworkspaces don't have status defined
     const status = typeof devworkspace.status.phase === 'string'
-      ? devworkspace.status.phase.toUpperCase()
-      : WorkspaceStatus[WorkspaceStatus.STARTING];
+      ? devworkspace.status.phase
+      : DevWorkspaceStatus[DevWorkspaceStatus.STARTING];
 
     const prevWorkspace = this.previousItems.get(namespace);
     if (prevWorkspace) {

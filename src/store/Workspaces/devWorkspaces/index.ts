@@ -25,6 +25,8 @@ import { deleteLogs, mergeLogs } from '../logs';
 const cheWorkspaceClient = container.get(CheWorkspaceClient);
 const devWorkspaceClient = container.get(DevWorkspaceClient);
 
+const devWorkspaceStatusMap = new Map<string, string | undefined>();
+
 export interface State {
   isLoading: boolean;
   workspaces: IDevWorkspace[];
@@ -349,7 +351,8 @@ function onStatusUpdateReceived(
     }
     status = statusUpdate.status;
   }
-  if (status && WorkspaceStatus[status]) {
+  if (status && status !== devWorkspaceStatusMap.get(workspace.status.devworkspaceId)) {
+    devWorkspaceStatusMap.set(workspace.status.devworkspaceId, status);
     dispatch({
       type: 'DEV_UPDATE_WORKSPACE_STATUS',
       workspaceId: workspace.status.devworkspaceId,

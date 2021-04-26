@@ -36,7 +36,7 @@ import {
 } from '@patternfly/react-core';
 import { ExternalLinkAltIcon } from '@patternfly/react-icons';
 import { BrandingData } from '../../services/bootstrap/branding.constant';
-import { WorkspaceAction, WorkspaceStatus } from '../../services/helpers/types';
+import { WorkspaceAction } from '../../services/helpers/types';
 import Head from '../../components/Head';
 import { buildGettingStartedLocation } from '../../services/helpers/location';
 import { AppAlerts } from '../../services/alerts/appAlerts';
@@ -151,18 +151,18 @@ export default class WorkspacesList extends React.PureComponent<Props, State> {
     return [
       {
         title: 'Open in Verbose Mode',
-        isDisabled: false === this.isEnabledAction(WorkspaceAction.START_DEBUG_AND_OPEN_LOGS, WorkspaceStatus[workspace.status]),
+        isDisabled: !this.isEnabledAction(WorkspaceAction.START_DEBUG_AND_OPEN_LOGS, workspace),
         onClick: (event, rowId, rowData) => this.handleAction(WorkspaceAction.START_DEBUG_AND_OPEN_LOGS, rowData),
 
       },
       {
         title: 'Start in Background',
-        isDisabled: false === this.isEnabledAction(WorkspaceAction.START_IN_BACKGROUND, WorkspaceStatus[workspace.status]),
+        isDisabled: !this.isEnabledAction(WorkspaceAction.START_IN_BACKGROUND, workspace),
         onClick: (event, rowId, rowData) => this.handleAction(WorkspaceAction.START_IN_BACKGROUND, rowData)
       },
       {
         title: 'Stop Workspace',
-        isDisabled: false === this.isEnabledAction(WorkspaceAction.STOP_WORKSPACE, WorkspaceStatus[workspace.status]),
+        isDisabled: !this.isEnabledAction(WorkspaceAction.STOP_WORKSPACE, workspace),
         onClick: (event, rowId, rowData) => this.handleAction(WorkspaceAction.STOP_WORKSPACE, rowData)
       },
       {
@@ -172,26 +172,13 @@ export default class WorkspacesList extends React.PureComponent<Props, State> {
     ];
   }
 
-  private isEnabledAction(action: WorkspaceAction, status: WorkspaceStatus): boolean {
+  private isEnabledAction(action: WorkspaceAction, workspace: Workspace): boolean {
     if (action === WorkspaceAction.START_DEBUG_AND_OPEN_LOGS
       || action === WorkspaceAction.START_IN_BACKGROUND) {
-      switch (status) {
-        case WorkspaceStatus.STARTING:
-        case WorkspaceStatus.RUNNING:
-        case WorkspaceStatus.STOPPING:
-          return false;
-        default:
-          return true;
-      }
+      return !workspace.isStarting && !workspace.isRunning && !workspace.isStopping;
     }
     if (action === WorkspaceAction.STOP_WORKSPACE) {
-      switch (status) {
-        case WorkspaceStatus.STARTING:
-        case WorkspaceStatus.RUNNING:
-          return true;
-        default:
-          return false;
-      }
+      return workspace.isStarting || workspace.isRunning;
     }
 
     return true;
@@ -310,7 +297,7 @@ export default class WorkspacesList extends React.PureComponent<Props, State> {
   }
 
   private handleSelectAll(isSelectedAll: boolean): void {
-    const selected = isSelectedAll === false
+    const selected = !isSelectedAll
       ? []
       : [...this.state.filtered];
 
@@ -326,7 +313,7 @@ export default class WorkspacesList extends React.PureComponent<Props, State> {
     if (rowIndex === -1) {
       /* (un)select all */
       const isSelectedAll = isSelected;
-      const selected = isSelectedAll === false
+      const selected = !isSelectedAll
         ? []
         : workspaces.map(workspace => workspace.id);
       this.setState({
@@ -397,7 +384,7 @@ export default class WorkspacesList extends React.PureComponent<Props, State> {
     }
     /* Update checkboxes states if workspaces are deleting */
     if (prevProps.isDeleted.length !== this.props.isDeleted.length) {
-      const selected = this.state.selected.filter(id => false === this.props.isDeleted.includes(id));
+      const selected = this.state.selected.filter(id => !this.props.isDeleted.includes(id));
       this.setState({
         selected,
       });

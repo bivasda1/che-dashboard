@@ -32,8 +32,7 @@ import {
 import {
   IdeLoaderTab,
   WorkspaceAction,
-  WorkspaceDetailsTab,
-  WorkspaceStatus,
+  WorkspaceDetailsTab
 } from '../../services/helpers/types';
 import { AppState } from '../../store';
 import { selectAllWorkspaces } from '../../store/Workspaces/selectors';
@@ -94,8 +93,7 @@ export class WorkspaceActionsProvider extends React.Component<Props, State> {
       for (const workspace of allWorkspaces) {
         const workspaceIndex = this.awaitToRestart.indexOf(workspace.id);
         if (workspaceIndex !== -1 &&
-          (workspace.status === WorkspaceStatus[WorkspaceStatus.STOPPED] ||
-            workspace.status === WorkspaceStatus[WorkspaceStatus.ERROR])) {
+          (workspace.isStopped || workspace.hasError)) {
           this.awaitToRestart.splice(workspaceIndex, 1);
           try {
             await this.props.startWorkspace(workspace);
@@ -153,8 +151,7 @@ export class WorkspaceActionsProvider extends React.Component<Props, State> {
         return buildDetailsLocation(workspace, WorkspaceDetailsTab.Devfile);
       case WorkspaceAction.DELETE_WORKSPACE:
         {
-          if (WorkspaceStatus[workspace.status] !== WorkspaceStatus.STOPPED
-            && WorkspaceStatus[workspace.status] !== WorkspaceStatus.ERROR) {
+          if (!workspace.isStopped && workspace.hasError) {
             throw new Error('Only STOPPED workspaces can be deleted.');
           }
 

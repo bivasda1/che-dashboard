@@ -18,7 +18,7 @@ import {
 } from '@patternfly/react-icons/dist/js/icons';
 import React from 'react';
 import { Label } from '@patternfly/react-core';
-import { WorkspaceStatus } from '../../services/helpers/types';
+import { DevWorkspaceStatus, WorkspaceStatus } from '../../services/helpers/types';
 import ReactTooltip from 'react-tooltip';
 
 import styles from './index.module.css';
@@ -69,7 +69,8 @@ class WorkspaceStatusLabel extends React.PureComponent<Props> {
     );
 
     switch (status) {
-      case WorkspaceStatus[WorkspaceStatus.STOPPED]:
+      case WorkspaceStatus.STOPPED:
+      case DevWorkspaceStatus.STOPPED:
         color = 'grey';
         return (
           <>
@@ -82,7 +83,8 @@ class WorkspaceStatusLabel extends React.PureComponent<Props> {
             {tooltip}
           </>
         );
-      case WorkspaceStatus[WorkspaceStatus.RUNNING]:
+      case WorkspaceStatus.RUNNING:
+      case DevWorkspaceStatus.RUNNING:
         color = 'green';
         return (
           <>
@@ -95,7 +97,8 @@ class WorkspaceStatusLabel extends React.PureComponent<Props> {
             {tooltip}
           </>
         );
-      case WorkspaceStatus[WorkspaceStatus.ERROR]:
+      case WorkspaceStatus.ERROR:
+      case DevWorkspaceStatus.FAILED:
         color = 'red';
         return (
           <>
@@ -108,7 +111,7 @@ class WorkspaceStatusLabel extends React.PureComponent<Props> {
             {tooltip}
           </>
         );
-      case WorkspaceStatus[WorkspaceStatus.PAUSED]:
+      case WorkspaceStatus.PAUSED:
         color = 'orange';
         return (
           <>
@@ -121,7 +124,8 @@ class WorkspaceStatusLabel extends React.PureComponent<Props> {
             {tooltip}
           </>
         );
-      case WorkspaceStatus[WorkspaceStatus.STARTING]:
+      case WorkspaceStatus.STARTING:
+      case DevWorkspaceStatus.STARTING:
         color = 'blue';
         return (
           <>
