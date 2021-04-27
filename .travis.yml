@@ -1,0 +1,24 @@
+services:
+  - docker
+jobs:
+  include:
+   - stage: building images
+     name: building amd64 image
+     arch: amd64
+     script:
+       - if [[ $TRAVIS_TAG =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; fi
+       - docker build --rm -t "quay.io/bivasda1/che-dashboard:${TRAVIS_COMMIT}-amd64" -f apache.Dockerfile .
+       - if [ -n "${TRAVIS_TAG}" ]; then docker tag quay.io/bivasda1/che-dashboard:${TRAVIS_COMMIT}-amd64 quay.io/bivasda1/che-dashboard:${TRAVIS_TAG}-amd64; fi
+       - docker images
+ 
+     before_deploy:
+       - docker login -u="${QUAY_USERNAME}" -p="${QUAY_PASSWORD}" quay.io
+       
+     deploy:
+       # Deploy alpha builds
+       - provider: script
+         script: docker push "quay.io/bivasda1/che-dashboard:${TRAVIS_TAG}-amd64"
+         skip_cleanup: true
+         on:
+           tags: true
+           condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+_[0-9]{3}$
